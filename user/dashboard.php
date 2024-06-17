@@ -188,15 +188,19 @@ document.getElementById('episodes-tab').addEventListener('click', function() {
     document.getElementById('episodes-content').style.display = 'block';
 });
 
+function normalizeString(str) {
+    return str.toLowerCase().replace(/\s+/g, '');
+}
+
 function searchAnime() {
-    var searchValue = document.getElementById('anime-search').value.toLowerCase();
-    var dropdownValue = document.getElementById('anime-dropdown').value.toLowerCase();
+    var searchValue = normalizeString(document.getElementById('anime-search').value);
+    var dropdownValue = normalizeString(document.getElementById('anime-dropdown').value);
     var resultsDiv = document.getElementById('anime-results');
     resultsDiv.innerHTML = '';
 
     var animes = <?php echo json_encode($animes); ?>;
     animes.forEach(function(anime) {
-        var name = anime.title.toLowerCase();
+        var name = normalizeString(anime.title);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
             var animeDiv = document.createElement('div');
             animeDiv.className = 'anime-item';
@@ -212,14 +216,14 @@ function searchAnime() {
 }
 
 function searchCharacter() {
-    var searchValue = document.getElementById('character-search').value.toLowerCase();
-    var dropdownValue = document.getElementById('character-dropdown').value.toLowerCase();
+    var searchValue = normalizeString(document.getElementById('character-search').value);
+    var dropdownValue = normalizeString(document.getElementById('character-dropdown').value);
     var resultsDiv = document.getElementById('character-results');
     resultsDiv.innerHTML = '';
 
     var characters = <?php echo json_encode($characters); ?>;
     characters.forEach(function(character) {
-        var name = character.name.toLowerCase();
+        var name = normalizeString(character.name);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
             var characterDiv = document.createElement('div');
             characterDiv.className = 'character-item';
@@ -234,14 +238,14 @@ function searchCharacter() {
 }
 
 function searchEpisode() {
-    var searchValue = document.getElementById('episode-search').value.toLowerCase();
-    var dropdownValue = document.getElementById('episode-dropdown').value.toLowerCase();
+    var searchValue = normalizeString(document.getElementById('episode-search').value);
+    var dropdownValue = normalizeString(document.getElementById('episode-dropdown').value);
     var resultsDiv = document.getElementById('episode-results');
     resultsDiv.innerHTML = '';
 
     var episodes = <?php echo json_encode($episodes); ?>;
     episodes.forEach(function(episode) {
-        var name = episode.title.toLowerCase();
+        var name = normalizeString(episode.title);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
             var episodeDiv = document.createElement('div');
             episodeDiv.className = 'episode-item';
@@ -254,6 +258,7 @@ function searchEpisode() {
         }
     });
 }
+
 
 
     </script>
