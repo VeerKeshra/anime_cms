@@ -1,0 +1,96 @@
+/* New Styles for Search Forms and Dropdowns */
+#search-form-anime, #search-form-characters, #search-form-episodes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#search-form-anime select, #search-form-characters select, #search-form-episodes select,
+#search-form-anime input, #search-form-characters input, #search-form-episodes input {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+#search-form-anime button, #search-form-characters button, #search-form-episodes button {
+    padding: 10px 20px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#search-form-anime button:hover, #search-form-characters button:hover, #search-form-episodes button:hover {
+    background-color: #4cae4c;
+}
+
+/* Styling for search results */
+.anime-item, .character-item, .episode-item {
+    background: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.anime-item h4, .character-item h4, .episode-item h4 {
+    margin-top: 0;
+}
+
+.anime-item img, .character-item img, .episode-item img {
+    width: 200px;
+    float: left;
+    margin-right: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Separation between description and reviews */
+.description {
+    margin-bottom: 20px;
+}
+
+.description .info {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.description .info strong {
+    margin-bottom: 5px;
+}
+
+.reviews {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.reviews h5 {
+    margin-top: 0;
+    color: #333;
+}
+
+.review-item {
+    margin-bottom: 10px;
+    padding: 15px;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.review-item strong {
+    display: block;
+    color: #333;
+    font-size: 18px;
+}
+
+.review-item p {
+    color: #555;
+    font-size: 16px;
+}
