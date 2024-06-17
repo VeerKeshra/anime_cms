@@ -195,8 +195,6 @@ function searchAnime() {
     resultsDiv.innerHTML = '';
 
     var animes = <?php echo json_encode($animes); ?>;
-    var reviews = <?php echo json_encode($reviews); ?>;
-
     animes.forEach(function(anime) {
         var name = anime.title.toLowerCase();
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
@@ -213,7 +211,6 @@ function searchAnime() {
     });
 }
 
-
 function searchCharacter() {
     var searchValue = document.getElementById('character-search').value.toLowerCase();
     var dropdownValue = document.getElementById('character-dropdown').value.toLowerCase();
@@ -221,35 +218,17 @@ function searchCharacter() {
     resultsDiv.innerHTML = '';
 
     var characters = <?php echo json_encode($characters); ?>;
-    var reviews = <?php echo json_encode($reviews); ?>;
-
     characters.forEach(function(character) {
         var name = character.name.toLowerCase();
-        if (name.includes(searchValue) || name === dropdownValue) {
-            var characterHtml = `
-                <div class="character-item">
-                    <h4>${character.name}</h4>
-                    <div class="description">
-                        <div class="info">
-                            <p><strong>Role:</strong> ${character.role}</p>
-                        </div>
-                        <p>${character.description.replace(/\n/g, '<br>')}</p>
-                    </div>
-                    <h5>Reviews:</h5>
-                    ${reviews.map(function(review) {
-                        if (review.character_id == character.character_id) {
-                            return `
-                                <div class="review-item">
-                                    <strong>${review.username}:</strong>
-                                    <p>${review.review_text} (Rating: ${review.rating}/10)</p>
-                                </div>
-                            `;
-                        }
-                        return '';
-                    }).join('')}
-                </div>
-            `;
-            resultsDiv.innerHTML += characterHtml;
+        if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
+            var characterDiv = document.createElement('div');
+            characterDiv.className = 'character-item';
+            characterDiv.innerHTML = `<h4>${character.name}</h4>
+                                      <div class="description">
+                                          <p><strong>Role:</strong> ${character.role}</p>
+                                          <p>${character.description}</p>
+                                      </div>`;
+            resultsDiv.appendChild(characterDiv);
         }
     });
 }
@@ -261,36 +240,17 @@ function searchEpisode() {
     resultsDiv.innerHTML = '';
 
     var episodes = <?php echo json_encode($episodes); ?>;
-    var reviews = <?php echo json_encode($reviews); ?>;
-
     episodes.forEach(function(episode) {
-        var title = episode.title.toLowerCase();
-        if (title.includes(searchValue) || title === dropdownValue) {
-            var episodeHtml = `
-                <div class="episode-item">
-                    <h4>${episode.title}</h4>
-                    <div class="description">
-                        <div class="info">
-                            <p><strong>Episode Number:</strong> ${episode.episode_number}</p>
-                            <p><strong>Air Date:</strong> ${episode.air_date}</p>
-                        </div>
-                        <p>${episode.synopsis.replace(/\n/g, '<br>')}</p>
-                    </div>
-                    <h5>Reviews:</h5>
-                    ${reviews.map(function(review) {
-                        if (review.episode_id == episode.episode_id) {
-                            return `
-                                <div class="review-item">
-                                    <strong>${review.username}:</strong>
-                                    <p>${review.review_text} (Rating: ${review.rating}/10)</p>
-                                </div>
-                            `;
-                        }
-                        return '';
-                    }).join('')}
-                </div>
-            `;
-            resultsDiv.innerHTML += episodeHtml;
+        var name = episode.title.toLowerCase();
+        if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
+            var episodeDiv = document.createElement('div');
+            episodeDiv.className = 'episode-item';
+            episodeDiv.innerHTML = `<h4>${episode.title}</h4>
+                                    <div class="description">
+                                        <p><strong>Air Date:</strong> ${episode.air_date}</p>
+                                        <p>${episode.description}</p>
+                                    </div>`;
+            resultsDiv.appendChild(episodeDiv);
         }
     });
 }
