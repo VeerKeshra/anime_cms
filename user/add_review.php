@@ -2,13 +2,20 @@
 session_start();
 require_once '../includes/config.php';
 
-$category_id = $rating = $review_text = "";
-$category_id_err = $rating_err = $review_text_err = "";
+// Check if the user is logged in and redirect to login page if not
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: ../login.php");
+    exit;
+}
 
 // Fetch existing anime, episodes, and characters for the dropdown
 $anime_list = $pdo->query("SELECT anime_id, title FROM Anime")->fetchAll(PDO::FETCH_ASSOC);
 $episode_list = $pdo->query("SELECT episode_id, title FROM Episodes")->fetchAll(PDO::FETCH_ASSOC);
 $character_list = $pdo->query("SELECT character_id, name FROM Characters")->fetchAll(PDO::FETCH_ASSOC);
+
+// Initialize variables
+$category_id = $category_type = $rating = $review_text = $captcha = "";
+$category_id_err = $rating_err = $review_text_err = $captcha_err = "";
 
 // Process form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -35,9 +42,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $review_text = trim($_POST["review_text"]);
     }
 
+    // Validate CAPTCHA
+    if (empty(trim($_POST["captcha"]))) {
+        $captcha_err = "Please enter the CAPTCHA.";
+    } elseif ($_POST["captcha"] !== $_SESSION['captcha']) {
+        $captcha_err = "Incorrect CAPTCHA.";
+    } else {
+        $captcha = trim($_POST["captcha"]);
+    }
+
     // Check for errors before inserting in database
-    if (empty($category_id_err) && empty($rating_err) && empty($review_text_err)) {
-        $category_type = $_POST['category_type'];
+    if (empty($category_id_err) && empty($rating_err) && empty($review_text_err) && empty($captcha_err)) {
         $sql = "INSERT INTO Reviews (category_id, user_id, rating, review_text, category_type) VALUES (:category_id, :user_id, :rating, :review_text, :category_type)";
 
         if ($stmt = $pdo->prepare($sql)) {
@@ -51,10 +66,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $param_user_id = $_SESSION["id"];
             $param_rating = $rating;
             $param_review_text = $review_text;
-            $param_category_type = $category_type;
+            $param_category_type = trim($_POST["category_type"]);
 
             if ($stmt->execute()) {
-                header("location: user_dashboard.php");
+                header("location: dashboard.php");
                 exit();
             } else {
                 echo "Oops! Something went wrong. Please try again later.";
@@ -80,67 +95,75 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h2 class="login-head">Add Review</h2>
             <p>Please fill this form to add a review.</p>
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                <div class="form-group <?php echo (!empty($category_id_err)) ? 'has-error' : ''; ?>">
-                    <label>Search</label>
-                    <select name="category_id" class="form-control" id="category_id">
+                <div class="form-group">
+                    <label for="category_type">Category</label>
+                    <select name="category_type" id="category_type" class="form-control">
                         <option value="">Select Category</option>
-                        <!-- Dynamic options based on the selected tab -->
+                        <option value="anime">Anime</option>
+                        <option value="episode">Episode</option>
+                        <option value="character">Character</option>
+                    </select>
+                </div>
+                <div class="form-group <?php echo (!empty($category_id_err)) ? 'has-error' : ''; ?>">
+                    <label for="category_id">Select Item</label>
+                    <select name="category_id" id="category_id" class="form-control">
+                        <option value="">Select Item</option>
+                        <!-- Options will be populated dynamically -->
                     </select>
                     <span class="help-block"><?php echo $category_id_err; ?></span>
                 </div>
                 <div class="form-group <?php echo (!empty($rating_err)) ? 'has-error' : ''; ?>">
-                    <label>Rating</label>
-                    <input type="number" name="rating" class="form-control" min="1" max="10" value="<?php echo $rating; ?>">
+                    <label for="rating">Rating</label>
+                    <input type="number" name="rating" id="rating" class="form-control" min="1" max="10" value="<?php echo $rating; ?>">
                     <span class="help-block"><?php echo $rating_err; ?></span>
                 </div>
                 <div class="form-group <?php echo (!empty($review_text_err)) ? 'has-error' : ''; ?>">
-                    <label>Review Text</label>
-                    <textarea name="review_text" class="form-control"><?php echo $review_text; ?></textarea>
+                    <label for="review_text">Review Text</label>
+                    <textarea name="review_text" id="review_text" class="form-control"><?php echo $review_text; ?></textarea>
                     <span class="help-block"><?php echo $review_text_err; ?></span>
                 </div>
-                <input type="hidden" name="category_type" id="category_type">
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                    <button type="reset" class="btn btn-reset">Reset</button>
-                </div>
+                <div class="form-group <?php echo (!empty($captcha_err)) ? 'has-error' : ''; ?>">
+        <label for="captcha">CAPTCHA</label>
+        <input type="text" name="captcha" id="captcha" class="form-control">
+        <img src="/wdev/anime_cms/user/generate_captcha.php" alt="CAPTCHA">
+        <span class="help-block"><?php echo $captcha_err; ?></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="reset" class="btn btn-reset">Reset</button>
+    </div>
             </form>
         </div>
     </div>
 
     <script>
-        // JavaScript to handle the tab selection and populate the dropdown based on the selected tab
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryTypeSelect = document.getElementById('category_type');
             const categorySelect = document.getElementById('category_id');
-            const categoryTypeInput = document.getElementById('category_type');
-            const tabs = document.querySelectorAll('.tab-button');
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function () {
-                    const categoryType = this.dataset.category;
-                    categoryTypeInput.value = categoryType;
+            categoryTypeSelect.addEventListener('change', function() {
+                const categoryType = this.value;
 
-                    // Clear the existing options
-                    categorySelect.innerHTML = '<option value="">Select Category</option>';
+                categorySelect.innerHTML = '<option value="">Select Item</option>';
 
-                    // Populate the options based on the selected category type
-                    let options = [];
-                    if (categoryType === 'anime') {
-                        options = <?php echo json_encode($anime_list); ?>;
-                    } else if (categoryType === 'episode') {
-                        options = <?php echo json_encode($episode_list); ?>;
-                    } else if (categoryType === 'character') {
-                        options = <?php echo json_encode($character_list); ?>;
-                    }
+                let options = [];
+                if (categoryType === 'anime') {
+                    options = <?php echo json_encode($anime_list); ?>;
+                } else if (categoryType === 'episode') {
+                    options = <?php echo json_encode($episode_list); ?>;
+                } else if (categoryType === 'character') {
+                    options = <?php echo json_encode($character_list); ?>;
+                }
 
-                    options.forEach(option => {
-                        const optionElement = document.createElement('option');
-                        optionElement.value = option[categoryType === 'anime' ? 'anime_id' : categoryType === 'episode' ? 'episode_id' : 'character_id'];
-                        optionElement.textContent = option.title || option.name;
-                        categorySelect.appendChild(optionElement);
-                    });
+                options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option[categoryType === 'anime' ? 'anime_id' : categoryType === 'episode' ? 'episode_id' : 'character_id'];
+                    optionElement.textContent = option.title || option.name;
+                    categorySelect.appendChild(optionElement);
                 });
             });
         });
-    </script>
+   
+</script>
 </body>
 </html>

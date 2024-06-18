@@ -81,3 +81,33 @@ form {
     color: red;
     font-size: 12px;
 }
+
+.review-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.review-author {
+    font-weight: bold;
+}
+
+.review-rating {
+    font-size: 1.1em;
+    color: #f39c12;
+}
+
+.review-text {
+    margin-top: 10px;
+    font-size: 0.9em;
+}

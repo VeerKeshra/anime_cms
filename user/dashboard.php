@@ -115,59 +115,49 @@ unset($stmt_reviews, $pdo);
         </div>
 
         <div id="anime-content" class="tab-content">
-            <h3>Anime</h3>
-            <!-- Search Form for Anime -->
-            <form id="search-form-anime">
-                <select id="anime-dropdown">
-                    <option value="">Select Anime</option>
-                    <?php foreach ($animes as $anime): ?>
-                        <option value="<?php echo htmlspecialchars($anime['title']); ?>"><?php echo htmlspecialchars($anime['title']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="text" id="anime-search" placeholder="Search Anime">
-                <button type="button" onclick="searchAnime()">Search</button>
-            </form>
-            <div id="anime-results">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
+    <h3>Anime</h3>
+    <form id="search-form-anime">
+        <select id="anime-dropdown">
+            <option value="">Select Anime</option>
+            <?php foreach ($animes as $anime): ?>
+                <option value="<?php echo htmlspecialchars($anime['title']); ?>"><?php echo htmlspecialchars($anime['title']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="text" id="anime-search" placeholder="Search Anime">
+        <button type="button" onclick="searchAnime()">Search</button>
+    </form>
+    <div id="anime-results"></div>
+</div>
 
-        <div id="characters-content" class="tab-content" style="display:none;">
-            <h3>Characters</h3>
-            <!-- Search Form for Characters -->
-            <form id="search-form-characters">
-                <select id="character-dropdown">
-                    <option value="">Select Character</option>
-                    <?php foreach ($characters as $character): ?>
-                        <option value="<?php echo htmlspecialchars($character['name']); ?>"><?php echo htmlspecialchars($character['name']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="text" id="character-search" placeholder="Search Characters">
-                <button type="button" onclick="searchCharacter()">Search</button>
-            </form>
-            <div id="character-results">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
+<div id="characters-content" class="tab-content" style="display:none;">
+    <h3>Characters</h3>
+    <form id="search-form-characters">
+        <select id="character-dropdown">
+            <option value="">Select Character</option>
+            <?php foreach ($characters as $character): ?>
+                <option value="<?php echo htmlspecialchars($character['name']); ?>"><?php echo htmlspecialchars($character['name']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="text" id="character-search" placeholder="Search Characters">
+        <button type="button" onclick="searchCharacter()">Search</button>
+    </form>
+    <div id="character-results"></div>
+</div>
 
-        <div id="episodes-content" class="tab-content" style="display:none;">
-            <h3>Episodes</h3>
-            <!-- Search Form for Episodes -->
-            <form id="search-form-episodes">
-                <select id="episode-dropdown">
-                    <option value="">Select Episode</option>
-                    <?php foreach ($episodes as $episode): ?>
-                        <option value="<?php echo htmlspecialchars($episode['title']); ?>"><?php echo htmlspecialchars($episode['title']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="text" id="episode-search" placeholder="Search Episodes">
-                <button type="button" onclick="searchEpisode()">Search</button>
-            </form>
-            <div id="episode-results">
-                <!-- Results will be displayed here -->
-            </div>
-        </div>
-    </div>
+<div id="episodes-content" class="tab-content" style="display:none;">
+    <h3>Episodes</h3>
+    <form id="search-form-episodes">
+        <select id="episode-dropdown">
+            <option value="">Select Episode</option>
+            <?php foreach ($episodes as $episode): ?>
+                <option value="<?php echo htmlspecialchars($episode['title']); ?>"><?php echo htmlspecialchars($episode['title']); ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="text" id="episode-search" placeholder="Search Episodes">
+        <button type="button" onclick="searchEpisode()">Search</button>
+    </form>
+    <div id="episode-results"></div>
+</div>
 
     <script>
         document.getElementById('anime-tab').addEventListener('click', function() {
@@ -193,12 +183,14 @@ function normalizeString(str) {
 }
 
 function searchAnime() {
+    console.log("Searching anime...");
     var searchValue = normalizeString(document.getElementById('anime-search').value);
     var dropdownValue = normalizeString(document.getElementById('anime-dropdown').value);
     var resultsDiv = document.getElementById('anime-results');
     resultsDiv.innerHTML = '';
 
     var animes = <?php echo json_encode($animes); ?>;
+    var reviews = <?php echo json_encode($reviews); ?>;
     animes.forEach(function(anime) {
         var name = normalizeString(anime.title);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
@@ -209,19 +201,35 @@ function searchAnime() {
                                       <p><strong>Genre:</strong> ${anime.genre}</p>
                                       <p><strong>Release Date:</strong> ${anime.release_date}</p>
                                       <p>${anime.description}</p>
-                                  </div>`;
+                                  </div>
+                                  <h5>Reviews:</h5>`;
+            var reviewList = reviews.filter(review => review.category_type === 'anime' && review.category_id == anime.anime_id);
+            reviewList.forEach(function(review) {
+                var reviewDiv = document.createElement('div');
+                reviewDiv.className = 'review-item';
+                reviewDiv.innerHTML = `<div class="review-header">
+                                           <span class="review-author">${review.username}</span>
+                                           <span class="review-rating">${review.rating}/10</span>
+                                       </div>
+                                       <p class="review-text">${review.review_text}</p>`;
+                animeDiv.appendChild(reviewDiv);
+            });
+
+            animeDiv.innerHTML += `</div>`;
             resultsDiv.appendChild(animeDiv);
         }
     });
 }
 
 function searchCharacter() {
+    console.log("Searching characters...");
     var searchValue = normalizeString(document.getElementById('character-search').value);
     var dropdownValue = normalizeString(document.getElementById('character-dropdown').value);
     var resultsDiv = document.getElementById('character-results');
     resultsDiv.innerHTML = '';
 
     var characters = <?php echo json_encode($characters); ?>;
+    var reviews = <?php echo json_encode($reviews); ?>;
     characters.forEach(function(character) {
         var name = normalizeString(character.name);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
@@ -231,19 +239,35 @@ function searchCharacter() {
                                       <div class="description">
                                           <p><strong>Role:</strong> ${character.role}</p>
                                           <p>${character.description}</p>
-                                      </div>`;
+                                      </div>
+                                      <h5>Reviews:</h5>`;
+            var reviewList = reviews.filter(review => review.category_type === 'character' && review.category_id == character.character_id);
+            reviewList.forEach(function(review) {
+                var reviewDiv = document.createElement('div');
+                reviewDiv.className = 'review-item';
+                reviewDiv.innerHTML = `<div class="review-header">
+                                           <span class="review-author">${review.username}</span>
+                                           <span class="review-rating">${review.rating}/10</span>
+                                       </div>
+                                       <p class="review-text">${review.review_text}</p>`;
+                characterDiv.appendChild(reviewDiv);
+            });
+
+            characterDiv.innerHTML += `</div>`;
             resultsDiv.appendChild(characterDiv);
         }
     });
 }
 
 function searchEpisode() {
+    console.log("Searching episodes...");
     var searchValue = normalizeString(document.getElementById('episode-search').value);
     var dropdownValue = normalizeString(document.getElementById('episode-dropdown').value);
     var resultsDiv = document.getElementById('episode-results');
     resultsDiv.innerHTML = '';
 
     var episodes = <?php echo json_encode($episodes); ?>;
+    var reviews = <?php echo json_encode($reviews); ?>;
     episodes.forEach(function(episode) {
         var name = normalizeString(episode.title);
         if ((searchValue && name.includes(searchValue)) || (dropdownValue && name === dropdownValue)) {
@@ -253,13 +277,25 @@ function searchEpisode() {
                                     <div class="description">
                                         <p><strong>Air Date:</strong> ${episode.air_date}</p>
                                         <p>${episode.description}</p>
-                                    </div>`;
+                                    </div>
+                                    <h5>Reviews:</h5>`;
+            var reviewList = reviews.filter(review => review.category_type === 'episode' && review.category_id == episode.episode_id);
+            reviewList.forEach(function(review) {
+                var reviewDiv = document.createElement('div');
+                reviewDiv.className = 'review-item';
+                reviewDiv.innerHTML = `<div class="review-header">
+                                           <span class="review-author">${review.username}</span>
+                                           <span class="review-rating">${review.rating}/10</span>
+                                       </div>
+                                       <p class="review-text">${review.review_text}</p>`;
+                episodeDiv.appendChild(reviewDiv);
+            });
+
+            episodeDiv.innerHTML += `</div>`;
             resultsDiv.appendChild(episodeDiv);
         }
     });
 }
-
-
 
     </script>
 </body>
